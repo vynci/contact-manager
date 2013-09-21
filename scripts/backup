@@ -1,0 +1,152 @@
+(function ($, BB, _) {
+
+	$('#add_contact').tooltip();
+
+	var App = Backbone.View.extend({
+		template: $('#contact_template').html(),
+		el: "#contacts",
+		events: {
+			'click #add_contact': 'addPerson'
+		},
+		initialize: function () {
+			this.input_name = $('#inputs input[name=fullname]');
+			this.input_number = $('#inputs input[name=number]');
+			this.input_username = $('#inputs input[name=username]');
+			this.contacts_list = $('.table tbody');
+			this.counter = 1;
+			this.render();
+		},
+		addPerson: function (evt) {
+
+			var person = new PersonModel({
+				name: this.input_name.val(),
+				number: this.input_number.val(),
+				username: this.input_username.val()
+			});
+
+			this.collection.add(person);
+			person.set("num", this.collection.length + 1);		
+			person.save();
+
+			var view = new PersonView({model: person});
+			this.contacts_list.append(view.render().el);
+			this.clearForm();
+			console.log(person);
+		},
+
+		addOne: function(contact) {
+			this.counter++;
+			contact.set("num", this.counter);
+			var contactView = new PersonView({ model: contact });
+			this.contacts_list.append(contactView.render().el);
+		},		
+
+      	render: function () {
+      		this.collection.each( this.addOne, this );
+			return this;
+     	},
+
+		clearForm: function() {
+			this.input_name.val('');
+			this.input_number.val('');
+			this.input_username.val('');
+		}     	
+
+
+
+	});
+
+	var PersonModel = Backbone.Model.extend({
+		idAttribute : "_id",
+		urlRoot: 'http://localhost:9090/contacts',
+		defaults: {
+			_id: null,
+			'name': '-',
+			'number': '-',
+			'username': '-',
+			'num': '-'
+		},
+		initialize: function () {
+
+		}
+	});
+
+	var PersonCollection = Backbone.Collection.extend({
+		model: PersonModel,
+		url: 'http://localhost:9090/contacts',
+		initialize: function () {
+
+		}
+	});
+	
+	var PersonView = Backbone.View.extend({
+		tagName: 'tr',
+		template: $('#contact_template').html(),
+		events: {
+			'click a.delete': 'deleteContact',
+			'click a.edit'  : 'editContact'
+		},
+
+		initialize: function() {
+			this.model.on('destroy', this.unrender, this);
+			this.model.on('change', this.render, this);
+		},
+
+		editContact: function() {
+			alert("Edit!");
+			vent.trigger('contact:edit', this.model);
+			$("#contact_template").hide();
+			$("#edit_mode_template").show();
+		},
+
+
+		deleteContact: function() {
+
+			this.model.destroy({
+	          success: function () {
+	            console.log('destroyed');
+	            //router.navigate('', {trigger:true});
+	          }
+	        })
+		},
+
+		render: function() {
+			var compiledTemplate = _.template(this.template);
+			this.$el.html(compiledTemplate(this.model.toJSON()))
+			//console.log(compiledTemplate(this.model.toJSON()));
+			return this;
+		},
+
+		unrender: function() {
+			this.remove();
+		}
+
+	});
+
+	Router = Backbone.Router.extend({
+	routes: {
+		'': 'index'
+	},
+
+	index: function() {
+		console.log( 'INDEX' );
+	}
+	});
+
+	new Router;
+	Backbone.history.start();
+
+	people = new PersonCollection;
+	people.fetch().then(function() {
+		new App({ collection: people });
+	});
+
+	window.vent = _.extend({}, Backbone.Events);
+
+	window.template = function(id) {
+		return _.template( $('#' + id).html() );
+	};
+
+
+
+})(jQuery, Backbone, _)
