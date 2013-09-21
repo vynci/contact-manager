@@ -47,21 +47,23 @@
 			this.input_number.val('');
 			this.input_username.val('');
 			
-		}     	
-
-
+		}
 
 	});
 
 	var PersonModel = Backbone.Model.extend({
+		validate: function(attrs) {
+			if( isNaN(attrs.number) == true ){
+				return 'Please enter a valid number';
+			}
+		},		
+
 		idAttribute : '_id',
 		urlRoot: 'http://localhost:9090/contacts',
 		defaults: {
-			'_id': null,
 			'name': '-',
 			'number': '-',
-			'username': '-',
-			'position': '-'
+			'username': '-'
 		},
 		initialize: function () {
 
@@ -143,6 +145,8 @@
 
 
 	});
+
+
 
 
 	people = new PersonCollection;
