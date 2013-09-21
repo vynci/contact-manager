@@ -115,12 +115,13 @@
         <td><%= number %></td>
         <td><%= username %></td>
         <td class="controls"><a href="#" class="edit">Edit</a> | <a href="#" class="delete">Delete</a></td>
+        
     </script>
     <script type="text/template" id="edit_mode_template">
         <td><%= position %></td>
-        <td><input type="text" name="fullname" value="<%= name %>"></td>
-        <td><input type="text" name="number" value="<%= number %>"></td>
-        <td><input type="text" name="username" value="<%= username %>"></td>
+        <td><input type="text" id="edit-name" name="fullname" value="<%= name %>"></td>
+        <td><input type="text" id="edit-number" name="number" value="<%= number %>"></td>
+        <td><input type="text" id="edit-username" name="username" value="<%= username %>"></td>
         <td class="confirmation"><span class="done">Done</span><span class="cancel">Cancel</span></td>
     </script>
     <script type="text/javascript" src="bower_components/jquery/jquery.js"></script>
@@ -128,4 +129,5 @@
     <script type="text/javascript" src="bower_components/underscore/underscore.js"></script>
     <script type="text/javascript" src="bower_components/backbone/backbone.js"></script>
     <script type="text/javascript" src="scripts/main.js"></script>
+
 </html>
