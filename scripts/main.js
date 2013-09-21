@@ -8,28 +8,25 @@
 		events: {
 			'click #add_contact': 'addPerson'
 		},
-		initialize: function () {
+		initialize: function () {	
+			this.collection.on('add', this.addOne, this);
 			this.input_name = $('#inputs input[name=fullname]');
 			this.input_number = $('#inputs input[name=number]');
 			this.input_username = $('#inputs input[name=username]');
 			this.contacts_list = $('.table tbody');
 			this.counter = 1;
 			this.render();
+
 		},
 		addPerson: function (evt) {
+			evt.preventDefault();
 
-			var person = new PersonModel({
+			this.collection.create({
 				name: this.input_name.val(),
 				number: this.input_number.val(),
 				username: this.input_username.val()
-			});
+			}, { wait: true });
 
-			this.collection.add(person);
-			person.set("position", this.collection.length + 1);		
-			person.save();
-
-			var view = new PersonView({model: person});
-			this.contacts_list.append(view.render().el);
 			this.clearForm();
 		},
 
@@ -49,6 +46,7 @@
 			this.input_name.val('');
 			this.input_number.val('');
 			this.input_username.val('');
+			
 		}     	
 
 
@@ -56,10 +54,10 @@
 	});
 
 	var PersonModel = Backbone.Model.extend({
-		idAttribute : "_id",
+		idAttribute : '_id',
 		urlRoot: 'http://localhost:9090/contacts',
 		defaults: {
-			_id: null,
+			'_id': null,
 			'name': '-',
 			'number': '-',
 			'username': '-',
@@ -90,8 +88,8 @@
 		},
 
 		initialize: function() {
-			this.model.on('destroy', this.unrender, this);
-			this.model.on('change', this.render, this);
+			this.listenTo(this.model, 'change', this.render);
+    		this.listenTo(this.model, 'destroy', this.remove);
 			this.contacts_list = $('.table tbody');
 		},
 
@@ -99,7 +97,6 @@
 
 			var compiledTemplateEdit = _.template(this.templateEdit);
 			this.$el.html(compiledTemplateEdit(this.model.toJSON()));
-			
 			this.input_name = this.$('#edit-name');
 			this.input_number = this.$('#edit-number');
 			this.input_username = this.$('#edit-username');
@@ -118,8 +115,10 @@
 		},
 
 		render: function() {
+
 			var compiledTemplate = _.template(this.template);
 			this.$el.html(compiledTemplate(this.model.toJSON()))
+			console.log(this.model);
 			return this;
 		},
 
@@ -131,8 +130,8 @@
 			this.render();	
 		},
 
-		done: function(e) {
-			e.preventDefault();
+		done: function(evt) {
+			evt.preventDefault();
 
 			this.model.save({
 				name: this.input_name.val(),
@@ -145,30 +144,10 @@
 
 	});
 
-	Router = Backbone.Router.extend({
-	routes: {
-		'': 'index'
-	},
-
-	index: function() {
-		console.log( 'INDEX' );
-	}
-	});
-
-	new Router;
-	Backbone.history.start();
 
 	people = new PersonCollection;
 	people.fetch().then(function() {
 		new App({ collection: people });
 	});
-
-	window.vent = _.extend({}, Backbone.Events);
-
-	window.template = function(id) {
-		return _.template( $('#' + id).html() );
-	};
-
-
 
 })(jQuery, Backbone, _)
