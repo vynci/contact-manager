@@ -53,16 +53,15 @@ function listContacts(req, res) {
 // Note: For security reasons, fields must be validated before saving to database in a real world scenario.
 // This is only for training purposes so it's not necessary to do validation.
 function createContact(req, res) {
-	  var contact = new Contact({
-	    name :req.body.name,
-	    number :req.body.number,
-	    username:req.body.username
-	    
-	  }).save(function(err,docs){
-	    if(err) throw err;
-	    res.send(docs);
-	    console.log(docs);
-	  });
+	Contact.create(req.body, function (err, doc) {
+		if (err) {
+			console.log(err);
+			res.send(500, err);
+		} else {
+			res.send(200, doc);
+			console.log(doc);
+		}
+	});
 }
 
 function deleteContactById(req, res) {
