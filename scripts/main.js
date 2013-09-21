@@ -53,6 +53,11 @@
 
 	var PersonModel = Backbone.Model.extend({
 		validate: function(attrs) {
+
+			if ( ! attrs.name || ! attrs.username ) {
+				return 'Fullname and Username are required.';
+			}
+
 			if( isNaN(attrs.number) == true ){
 				return 'Please enter a valid number';
 			}
@@ -65,8 +70,11 @@
 			'number': '-',
 			'username': '-'
 		},
-		initialize: function () {
 
+		initialize: function () {
+			this.on("invalid",function(model,error){
+            	alert(error);
+        	});
 		}
 	});
 
@@ -145,7 +153,7 @@
 
 
 	});
-
+	
 
 
 
@@ -153,5 +161,7 @@
 	people.fetch().then(function() {
 		new App({ collection: people });
 	});
+
+
 
 })(jQuery, Backbone, _)
